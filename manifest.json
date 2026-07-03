@@ -5,10 +5,10 @@
     "description": "Save and restore Workspaces",
     "icons": { "48": "icons/icon.png" },
     "action": {
-        "default_popup": "dist/popup/popup.html"
+        "default_popup": "src/popup/index.html"
     },
     "permissions": ["storage", "tabs"],
     "background": {
-        "service_worker": "dist/background/background.js"
+        "service_worker": "src/background/background.ts"
     }
 }

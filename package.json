@@ -1,13 +1,16 @@
 {
   "name": "context-switching-manager",
   "version": "1.0.0",
+  "type": "module",
   "description": "A chrome extension for saving and restoring workspaces based on task. Addresses the problem of losing track of where you were when switching between differen tasks.",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build",
+    "dev": "vite"
   },
   "repository": {
     "type": "git",
@@ -16,15 +19,21 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/gdmarcum/context-switching-manager/issues"
   },
   "homepage": "https://github.com/gdmarcum/context-switching-manager#readme",
   "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@types/chrome": "^0.2.0"
+    "@crxjs/vite-plugin": "^2.7.1",
+    "@types/chrome": "^0.2.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^5.4.21"
   }
 }
