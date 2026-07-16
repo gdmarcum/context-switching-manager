@@ -1,22 +1,33 @@
-import { Tab, Workspace } from '../types/workspace';
-import { WorkspaceRepository } from '../repositories/workspaceRepository';
+import { Tab, Workspace, WorkspaceMap } from '../types/workspace';
+import { WorkspaceRepository } from '../repositories/WorkspaceRepository';
 
 export class WorkspaceService {
   private repo = new WorkspaceRepository();
 
-  async saveCurrentTabs(): Promise<void> {
+  async saveCurrentTabsAsWorkspace(name: string): Promise<Workspace> {
     const tabs = await this.queryTabs();
-    await this.repo.save({ tabs });
+    const workspace: Workspace = {
+      id: crypto.randomUUID(),
+      name,
+      tabs,
+    };
+    await this.repo.saveOne(workspace);
+    return workspace;
   }
 
-  async restoreTabs(): Promise<void> {
-    const workspace = await this.repo.load();
+  async restoreWorkspace(id: string): Promise<void> {
+    const all = await this.repo.loadAll();
+    const workspace = all[id];
     if (!workspace) return;
     workspace.tabs.forEach(tab => chrome.tabs.create({ url: tab.url }));
   }
 
-  async loadSaved(): Promise<Workspace | null> {
-    return this.repo.load();
+  async deleteWorkspace(id: string): Promise<void> {
+    await this.repo.deleteOne(id);
+  }
+
+  async loadAllWorkspaces(): Promise<WorkspaceMap> {
+    return this.repo.loadAll();
   }
 
   private queryTabs(): Promise<Tab[]> {
