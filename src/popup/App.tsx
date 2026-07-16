@@ -1,37 +1,66 @@
 import { useState, useEffect } from 'react';
 import { WorkspaceService } from '../services/WorkspaceService';
-import { Tab } from '../types/workspace';
+import { WorkspaceMap } from '../types/workspace';
+import WorkspaceList from './WorkspaceList';
+import WorkspaceDetail from './WorkspaceDetail';
+import SaveWorkspaceModal from './SaveWorkspaceModal';
 
 const service = new WorkspaceService();
 
 export default function App() {
-  const [tabs, setTabs] = useState<Tab[]>([]);
+  const [workspaces, setWorkspaces] = useState<WorkspaceMap>({});
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    service.loadSaved().then(workspace => {
-      if (workspace) setTabs(workspace.tabs);
-    });
+    refresh();
   }, []);
 
-  async function handleSave() {
-    await service.saveCurrentTabs();
-    const workspace = await service.loadSaved();
-    if (workspace) setTabs(workspace.tabs);
+  async function refresh() {
+    const all = await service.loadAllWorkspaces();
+    setWorkspaces(all);
   }
 
-  async function handleRestore() {
-    await service.restoreTabs();
+  async function handleSave(name: string) {
+    await service.saveCurrentTabsAsWorkspace(name);
+    await refresh();
+    setModalOpen(false);
+  }
+
+  async function handleRestore(id: string) {
+    await service.restoreWorkspace(id);
+  }
+
+  async function handleDelete(id: string) {
+    await service.deleteWorkspace(id);
+    await refresh();
+    if (selectedId === id) {
+      setSelectedId(null);
+    }
   }
 
   return (
-    <div>
-      <button onClick={handleSave}>Save Workspace</button>
-      <button onClick={handleRestore}>Restore Workspace</button>
-      <ul>
-        {tabs.map((tab, i) => (
-          <li key={i}>{tab.title}</li>
-        ))}
-      </ul>
+    <div style={{ padding: '8px', width: '250px' }}>
+      <button onClick={() => setModalOpen(true)}>Save Current Tabs</button>
+
+      {modalOpen && (
+        <SaveWorkspaceModal
+          onSave={handleSave}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+
+      <WorkspaceList
+        workspaces={workspaces}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+      />
+
+      <WorkspaceDetail
+        workspace={selectedId ? workspaces[selectedId] : null}
+        onRestore={handleRestore}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

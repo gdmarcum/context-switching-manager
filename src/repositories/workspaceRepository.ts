@@ -1,20 +1,32 @@
-import { Workspace } from '../types/workspace';
+import { WorkspaceMap, Workspace } from '../types/workspace';
 
 export class WorkspaceRepository {
-  save(workspace: Workspace): Promise<void> {
+  saveAll(workspaces: WorkspaceMap): Promise<void> {
     return new Promise((resolve) => {
-      chrome.storage.local.set({ workspace }, resolve);
+      chrome.storage.local.set({ workspaces }, resolve);
     });
   }
 
-  load(): Promise<Workspace | null> {
+  loadAll(): Promise<WorkspaceMap> {
     return new Promise((resolve) => {
       chrome.storage.local.get(
-        ['workspace'],
-        (result: { workspace?: Workspace }) => {
-          resolve(result.workspace ?? null);
+        ['workspaces'],
+        (result: { workspaces?: WorkspaceMap }) => {
+          resolve(result.workspaces ?? {});
         }
       );
     });
+  }
+
+  async saveOne(workspace: Workspace): Promise<void> {
+    const all = await this.loadAll();
+    all[workspace.id] = workspace;
+    await this.saveAll(all);
+  }
+
+  async deleteOne(id: string): Promise<void> {
+    const all = await this.loadAll();
+    delete all[id];
+    await this.saveAll(all);
   }
 }
